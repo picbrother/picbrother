@@ -43,7 +43,7 @@ class Photo(Base):
 
 class MysqlAPI:
 	def __init__(self, host, user, pswd, db, *, verbose=False):
-		s = 'mysql://{user}:{pswd}@{host}/{db}'.format(
+		s = 'mysql+oursql://{user}:{pswd}@{host}/{db}'.format(
 			host=host,
 			user=user,
 			pswd=pswd,
