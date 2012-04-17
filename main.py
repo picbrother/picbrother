@@ -3,6 +3,7 @@
 from facebookAPI import *
 from facecomAPI import *
 from mysqlAPI import *
+from gephiAPI import *
 
 # facebook
 FB_ACCESS_TOKEN = "AAAEZAiryFyTcBAPPdSJcEt68wob2k0sBqc9SqUAcnnWxT42D3M5pDPzORA9HlSh1ldA9fos9GYQ2HhUdFrbrngCWUF2WIvXhifd70wjwFsC86pCXl"
@@ -18,11 +19,15 @@ DB_USER		= "root"
 DB_PSWD		= "root"
 DB_NAME		= "picbrother"
 
+#GEPHI
+GEPHI_HOST	= "172.22.5.10"
+GEPHI_PORT	= 80
+
 # instanciation des apis
 fbapi = FacebookAPI(FB_ACCESS_TOKEN)
 fcapi = FacecomAPI(FC_API_KEY, FC_APP_SECRET)
 dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
-
+graphapi = GephiAPI(GEPHI_HOST, GEPHI_PORT)
 
 def add_users(tags):
 	results = []
@@ -35,6 +40,7 @@ def add_users(tags):
 			if user_exists:
 				results.append(user_exists)
 				ful_name = user_exists.first_name+" "+user_exists.last_name
+				graphapi.add_node(fb_id)
 			else:
 				profile = fbapi.get_profile(fb_id)
 				new_user = User(
