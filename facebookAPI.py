@@ -12,12 +12,20 @@ class ResponsePages:
 		self.url = None
 		self.raw_page = None
 		self.page = {'paging': {'next': url}}
+		#self.opener = request.FancyURLopener(max_tries=10)
 
 	def init(self, url):
 		if self.verbose:
 			print(url)
 		self.url = url
-		self.raw_page = request.urlopen(url).read().decode()
+		self.raw_page = "{'paging': {'next': url}}"
+		for i in range(10):
+			try:
+				self.raw_page = request.urlopen(url).read().decode()
+			except Exception as ex:
+				print(ex)
+			else:
+				break
 		self.page = json.loads(self.raw_page)
 
 	def __iter__(self):
@@ -69,7 +77,15 @@ class FacebookAPI:
 		url = "https://graph.facebook.com/%s?&access_token=%s" % (subject, self.access_token)
 		if self.verbose:
 			print(url)
-		r = request.urlopen(url).read().decode()
+		#opener = request.FancyURLopener()
+		r = "{}"
+		for i in range(10):
+			try:
+				r = request.urlopen(url).read().decode()
+			except Exception as ex:
+				print(ex)
+			else:
+				break
 		return json.loads(r)
 
 if __name__ == "__main__":

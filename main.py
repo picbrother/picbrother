@@ -2,7 +2,7 @@
 
 from facebookAPI import *
 from facecomAPI import *
-#from mysqlAPI import *
+from mysqlAPI import *
 from gephiAPI import *
 
 # facebook
@@ -26,7 +26,7 @@ GEPHI_PORT	= 80
 # instanciation des apis
 fbapi = FacebookAPI(FB_ACCESS_TOKEN)
 fcapi = FacecomAPI(FC_API_KEY, FC_APP_SECRET)
-#dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
+dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
 graphapi = GephiAPI(GEPHI_HOST, GEPHI_PORT)
 
 def add_users(tags):
@@ -37,10 +37,8 @@ def add_users(tags):
 			fb_id = int(user['uid'].split("@",1)[0])
 			confidence = user['confidence']
 			user_exists = dbapi.get_fb_user(fb_id)
-			if True:user_exists:
-				results.append(user_exists)
-				ful_name = user_exists.first_name+" "+user_exists.last_name
-				graphapi.add_node(fb_id)
+			if user_exists:
+				db_user = user_exists
 			else:
 				profile = fbapi.get_profile(fb_id)
 				new_user = User(
@@ -52,9 +50,13 @@ def add_users(tags):
 				if isinstance(r,str):
 					print("\t\t"+r)
 					ful_name = "db error"
+					db_user = None
 				else:
-					results.append(new_user)
-					ful_name = new_user.first_name+" "+new_user.last_name
+					db_user = r
+			if db_user:
+				results.append(db_user)
+				graphapi.add_node(db_user.fb_id)
+				ful_name = db_user.first_name+" "+db_user.last_name
 			print("\t\t* %s #%s (%s percents)" % (ful_name, fb_id, confidence))
 		else:
 			print("\t\t* not recognizable")

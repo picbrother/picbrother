@@ -11,12 +11,12 @@ Base = declarative_base()
 # table de relation many to many
 photo_users = Table('J_PHOTO_USER', Base.metadata,
 	Column('photo_id', Integer, ForeignKey('T_PHOTO.id')),
-	Column('user_id', Integer, ForeignKey('T_USER.id'))
+	Column('user_id', Integer, ForeignKey('T_USER.id')),
 )
 
 class User(Base):
 	__tablename__ = 'T_USER'
-
+	
 	id = Column(Integer, primary_key=True)
 	fb_id = Column(BigInteger, unique=True)
 	first_name = Column(String(100), nullable=False)
@@ -30,7 +30,7 @@ class User(Base):
 
 class Album(Base):
 	__tablename__ = 'T_ALBUM'
-
+	
 	id = Column(Integer, primary_key=True)
 	fb_id = Column(BigInteger, unique=True)
 	name = Column(String(255), nullable=False)
@@ -41,10 +41,10 @@ class Album(Base):
 
 class Photo(Base):
 	__tablename__ = 'T_PHOTO'
-
+	
 	id = Column(Integer, primary_key=True)
 	fb_id = Column(BigInteger, unique=True)
-	url = Column(String(512), unique=True, nullable=False)
+	url = Column(String(255), unique=True, nullable=False)
 	album_id = Column(Integer, ForeignKey(Album.__tablename__+'.id'), nullable=False)
 
 	users = relationship('User', secondary=photo_users, backref=__tablename__)
@@ -56,7 +56,7 @@ class Photo(Base):
 
 class MysqlAPI:
 	def __init__(self, host, user, pswd, db, *, verbose=False):
-		s = 'mysql+oursql://{user}:{pswd}@{host}/{db}'.format(
+		s = 'mysql+oursql://{user}:{pswd}@{host}/{db}?charset=utf8'.format(
 			host=host,
 			user=user,
 			pswd=pswd,
@@ -112,11 +112,11 @@ if __name__ == '__main__':
 		first_name="bid", last_name="on"
 	)
 	api.add_object(user2)
-	user = api.get_fb_user(fb_id='1161312122')
+	user = api.get_fb_user(fb_id=1161312122)
 	print(user)
 	print(user.photos)
 	photo = Photo(
-		fb_id = "1234",
+		fb_id = 1234,
 		url = "http://bidon.com/photo.img",
 		album = album,
 	)
