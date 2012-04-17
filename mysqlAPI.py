@@ -2,7 +2,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, Integer, BigInteger, String, Table, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref
-from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.exc import IntegrityError
 
 Base = declarative_base()
@@ -58,6 +58,8 @@ class MysqlAPI:
 			return self._session.query(User).filter_by(fb_id=fb_id).one()
 		except MultipleResultsFound as ex:
 			print(ex)
+		except NoResultFound:
+			pass
 
 	def add_user(self, user):
 		error = ""
@@ -67,9 +69,31 @@ class MysqlAPI:
 		try:
 			self._session.commit()
 		except IntegrityError as ex:
-			error = ex.__class__.__name__
+			error = str(ex)
 			self._session.rollback()
 		return error
+	
+	def get_fb_photo(self, fb_id):
+		try:
+			return self._session.query(Photo).filter_by(fb_id=fb_id).one()
+		except MultipleResultsFound as ex:
+			print(ex)
+		except NoResultFound:
+			pass
+			
+	def add_photo(self, photo):
+		error = ""
+		self._session.add(photo)
+		try:
+			self._session.commit()
+			return photo
+		except IntegrityError as ex:
+			error = str(ex)
+			self._session.rollback()
+		return error
+
+	def update(self):
+		self._session.commit()
 
 if __name__ == '__main__':
 	api = MysqlAPI('localhost', 'root', 'root', 'picbrother', verbose=True)
@@ -86,3 +110,10 @@ if __name__ == '__main__':
 	user = api.get_fb_user(fb_id='1161312122')
 	print(user)
 	print(user.photos)
+	photo = Photo(
+		fb_id = "1234",
+		url = "http://bidon.com/photo.img"
+	)
+	photo.users.extend([user, user2])
+	photo = api.add_photo(photo)
+	print(photo)

@@ -4,7 +4,8 @@ from urllib import request
 import json
 
 class FacecomAPI:
-	def __init__(self, api_key, api_secret):
+	def __init__(self, api_key, api_secret, *, verbose=False):
+		self.verbose = verbose
 		self.api_key = api_key
 		self.api_secret = api_secret
 		self.opener = request.FancyURLopener()
@@ -55,8 +56,9 @@ class FacecomAPI:
 		"""
 		for k,v in data.items():
 			url += "%s=%s&" % (k,v)"""
-			
-		print(url)
+
+		if self.verbose:
+			print(url)
 		r = self.opener.open(url)
 		s = r.read().decode()
 		return json.loads(s)
@@ -65,7 +67,7 @@ class FacecomAPI:
 if __name__ == "__main__":
 	API_KEY		= "da444b9c09b0c03a7355a3b37a56c1e0"
 	APP_SECRET	= "8138a4afa7d5bb82fc167f0a594dfccf"
-	api = FacecomAPI(API_KEY, APP_SECRET)
+	api = FacecomAPI(API_KEY, APP_SECRET, verbose=True)
 
 	result = api.recognize(
 		"https://fbcdn-sphotos-a.akamaihd.net/hphotos-ak-ash3/528598_226102264164638_100002945999274_426143_744451539_n.jpg",

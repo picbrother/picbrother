@@ -5,16 +5,17 @@ import json
 
 
 
-
-
+	
 class ResponsePages:
-	def __init__(self, url):
+	def __init__(self, url, verbose):
+		self.verbose = verbose
 		self.url = None
 		self.raw_page = None
 		self.page = {'paging': {'next': url}}
 
 	def init(self, url):
-		print(url)
+		if self.verbose:
+			print(url)
 		self.url = url
 		self.raw_page = request.urlopen(url).read().decode()
 		self.page = json.loads(self.raw_page)
@@ -34,8 +35,9 @@ class ResponsePages:
 			return self.page
 
 class DataResponse(ResponsePages):
-	def __init__(self, url):
-		ResponsePages.__init__(self, url)
+	def __init__(self, url, verbose):
+		self.verbose = verbose
+		ResponsePages.__init__(self, url, self.verbose)
 		ResponsePages.__next__(self)
 		self.iobject = iter(self.page['data'])
 	
@@ -53,25 +55,34 @@ class DataResponse(ResponsePages):
 		
 	
 class FacebookAPI:
-	def __init__(self, access_token):
+	def __init__(self, access_token, *, verbose=False):
 		self.access_token = access_token
+		self.verbose = verbose
 
 	def get_albums(self, subject):
-		return DataResponse("https://graph.facebook.com/%s/albums?limit=100&access_token=%s" % (subject, self.access_token))
+		return DataResponse("https://graph.facebook.com/%s/albums?limit=100&access_token=%s" % (subject, self.access_token), self.verbose)
 
 	def get_photos(self, subject):
-		return DataResponse("https://graph.facebook.com/%s/photos?limit=100&access_token=%s" % (subject, self.access_token))
+		return DataResponse("https://graph.facebook.com/%s/photos?limit=100&access_token=%s" % (subject, self.access_token), self.verbose)
 
+	def get_profile(self, subject):
+		url = "https://graph.facebook.com/%s?&access_token=%s" % (subject, self.access_token)
+		if self.verbose:
+			print(url)
+		r = request.urlopen(url).read().decode()
+		return json.loads(r)
 
 if __name__ == "__main__":
-	ACCESS_TOKEN = "AAAAAAITEghMBAE72EK4Hsu3a8OvwWCLVsvokQnx3tFlZCyN3zqonZBmMXtc8625RhHPYC3FVm23sNOIx73INDjWb3oU3Iv4HFKWOL0ctAS0xQrbn2E"
+	ACCESS_TOKEN = "AAAEZAiryFyTcBAPPdSJcEt68wob2k0sBqc9SqUAcnnWxT42D3M5pDPzORA9HlSh1ldA9fos9GYQ2HhUdFrbrngCWUF2WIvXhifd70wjwFsC86pCXl"
 
-	api = FacebookAPI(ACCESS_TOKEN)
+	api = FacebookAPI(ACCESS_TOKEN, verbose=True)
 
 	nb_albums = 0
 	nb_photos = 0
 
-
+	profile = api.get_profile("me")
+	print(profile)
+	exit()
 	for album in api.get_albums("me"):
 		print("ALBUM {name} (#{id})".format(**album))
 		nb_albums += 1
