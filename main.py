@@ -5,7 +5,7 @@ from facecomAPI import *
 from mysqlAPI import *
 
 # facebook
-FB_ACCESS_TOKEN = "AAAEZAiryFyTcBAPPdSJcEt68wob2k0sBqc9SqUAcnnWxT42D3M5pDPzORA9HlSh1ldA9fos9GYQ2HhUdFrbrngCWUF2WIvXhifd70wjwFsC86pCXl"
+FB_ACCESS_TOKEN = "AAAEZAiryFyTcBABydOZBjsViB2dq5WF9nQtzzbZAFqUI8eZABmijbVIUlNEuFxIXypncZADRGIuKtZCXt6jQKf4RGBe7izG1mUlthVG3xqZBaA5PxpmEzOX"
 FB_USER_ID		= "100002945999274"
 
 # facecom
@@ -42,9 +42,9 @@ def add_users(tags):
 					first_name=profile['first_name'],
 					last_name=profile['last_name'],
 				)
-				error = dbapi.add_user(new_user)
-				if error:
-					print("\t\t"+error)
+				r = dbapi.add_object(new_user)
+				if isinstance(r,str):
+					print("\t\t"+r)
 					ful_name = "db error"
 				else:
 					results.append(new_user)
@@ -55,7 +55,7 @@ def add_users(tags):
 	return results
 
 
-def add_photo(fb_id, photo):
+def add_photo(album, fb_id, photo):
 	fb_id = int(fb_id)
 	url = photo['url']
 	tags = photo['tags']
@@ -68,35 +68,55 @@ def add_photo(fb_id, photo):
 		photo = Photo(
 			fb_id = fb_id,
 			url = url,
-			users = users
+			users = users,
+			album = album,
 		)
-		dbapi.add_photo(photo)
+		dbapi.add_object(photo)
 	
-
+stop = False
 # parcourt des photos facebook
 for album in fbapi.get_albums("me"):
-	title = "ALBUM {name} (#{id})".format(**album)
-	print("*"*100)
-	print("{: ^100}".format(title))
-	print("*"*100)
-	for photo in fbapi.get_photos(album['id']):
-		photo_fb_id = photo['id']
-		print("\tPHOTO #%s" % photo_fb_id)
-		print("\turl = %s" % photo['source'])
-		result = fcapi.recognize(
-			photo["source"],
-			"friends@facebook.com",
-			namespace="facebook.com",
-			detector="Aggressive",
-			#attributes="all",
-			user_auth="fb_user:%s,fb_oauth_token:%s" % (FB_USER_ID, FB_ACCESS_TOKEN)
-		)
-		if result and 'photos' in result:
-			for photo in result['photos']:
-				add_photo(photo_fb_id, photo)
-		else:
-			print("\t\tno result")
-		#input("appuyez sur une touche...")
-
+	if stop:
+		break
+	try:
+		title = "ALBUM {name} (#{id})".format(**album)
+		print("*"*100)
+		print("{: ^100}".format(title))
+		print("*"*100)
+		album_fb_id = album['id']
+		db_album = dbapi.get_fb_album(album_fb_id)
+		if not db_album:
+			db_album = Album(
+				fb_id=album_fb_id,
+				name=album['name']
+			)
+			r = dbapi.add_object(db_album)
+			if isinstance(r, str):
+				print("\tERROR: ",r)
+				continue
+		for photo in fbapi.get_photos(album['id']):
+			photo_fb_id = photo['id']
+			print("\tPHOTO #%s" % photo_fb_id)
+			print("\turl = %s" % photo['source'])
+			photo_exists = dbapi.get_fb_photo(photo_fb_id)
+			if photo_exists:
+				print("\tphoto déjà visitée")
+			else:
+				result = fcapi.recognize(
+					photo["source"],
+					"friends@facebook.com",
+					namespace="facebook.com",
+					detector="Aggressive",
+					#attributes="all",
+					user_auth="fb_user:%s,fb_oauth_token:%s" % (FB_USER_ID, FB_ACCESS_TOKEN)
+				)
+				if result and 'photos' in result:
+					for photo in result['photos']:
+						add_photo(db_album, photo_fb_id, photo)
+				else:
+					print("\t\tno result")
+			#input("appuyez sur une touche...")
+	except KeyboardInterrupt:
+		stop = True
 
 

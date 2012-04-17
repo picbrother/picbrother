@@ -1,5 +1,7 @@
 
-easy_install3-2 oursql
-easy_install3-2 SQLAlchemy
+apt-get install python3-setuptools
+easy_install3 cython
+easy_install3 oursql
+easy_install3 SQLAlchemy
 
 
