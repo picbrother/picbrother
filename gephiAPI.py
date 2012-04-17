@@ -6,8 +6,6 @@ import urllib.error
 import json
 
 
-from tools import *
-
 
 class GephiAPI:
 	def __init__(self, host="localhost", port=8080):
