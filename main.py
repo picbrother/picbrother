@@ -2,7 +2,8 @@
 
 from facebookAPI import *
 from facecomAPI import *
-from mysqlAPI import *
+#from mysqlAPI import *
+from gephiAPI import *
 
 # facebook
 FB_ACCESS_TOKEN = "AAAEZAiryFyTcBABydOZBjsViB2dq5WF9nQtzzbZAFqUI8eZABmijbVIUlNEuFxIXypncZADRGIuKtZCXt6jQKf4RGBe7izG1mUlthVG3xqZBaA5PxpmEzOX"
@@ -18,11 +19,15 @@ DB_USER		= "root"
 DB_PSWD		= "root"
 DB_NAME		= "picbrother"
 
+#GEPHI
+GEPHI_HOST	= "172.22.5.10"
+GEPHI_PORT	= 80
+
 # instanciation des apis
 fbapi = FacebookAPI(FB_ACCESS_TOKEN)
 fcapi = FacecomAPI(FC_API_KEY, FC_APP_SECRET)
-dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
-
+#dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
+graphapi = GephiAPI(GEPHI_HOST, GEPHI_PORT)
 
 def add_users(tags):
 	results = []
@@ -32,9 +37,10 @@ def add_users(tags):
 			fb_id = int(user['uid'].split("@",1)[0])
 			confidence = user['confidence']
 			user_exists = dbapi.get_fb_user(fb_id)
-			if user_exists:
+			if True:user_exists:
 				results.append(user_exists)
 				ful_name = user_exists.first_name+" "+user_exists.last_name
+				graphapi.add_node(fb_id)
 			else:
 				profile = fbapi.get_profile(fb_id)
 				new_user = User(
@@ -65,6 +71,9 @@ def add_photo(album, fb_id, photo):
 		photo_exists.users = users
 		dbapi.update()
 	else:
+		for u1 in users:
+			for u2 in users:
+				graphapi.add_edge(str(u1.fb_id), str(u2.fb_id))
 		photo = Photo(
 			fb_id = fb_id,
 			url = url,
