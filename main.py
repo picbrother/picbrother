@@ -6,7 +6,7 @@ from mysqlAPI import *
 from gephiAPI import *
 
 # facebook
-FB_ACCESS_TOKEN = "AAAEZAiryFyTcBABydOZBjsViB2dq5WF9nQtzzbZAFqUI8eZABmijbVIUlNEuFxIXypncZADRGIuKtZCXt6jQKf4RGBe7izG1mUlthVG3xqZBaA5PxpmEzOX"
+FB_ACCESS_TOKEN = "AAAEZAiryFyTcBAMjxztgJGaEAFpwXidNZAt03pfSS6cJUXFGrCgome0Bs41HDm5nvsVZCByxGsV6iLxv3l9ESayTZCp5kZBTRf2aehYsuhgY6L0s1y9ZBo"
 FB_USER_ID		= "100002945999274"
 
 # facecom
@@ -20,8 +20,8 @@ DB_PSWD		= "root"
 DB_NAME		= "picbrother"
 
 #GEPHI
-GEPHI_HOST	= "172.22.5.10"
-GEPHI_PORT	= 80
+GEPHI_HOST	= "localhost"
+GEPHI_PORT	= 8080
 
 # instanciation des apis
 fbapi = FacebookAPI(FB_ACCESS_TOKEN)
@@ -40,13 +40,20 @@ def add_users(tags):
 			if user_exists:
 				db_user = user_exists
 			else:
-				profile = fbapi.get_profile(fb_id)
-				new_user = User(
-					fb_id=fb_id,
-					first_name=profile['first_name'],
-					last_name=profile['last_name'],
-				)
-				r = dbapi.add_object(new_user)
+				for i in range(10):
+					try: 
+						profile = fbapi.get_profile(fb_id)
+						new_user = User(
+							fb_id=fb_id,
+							first_name=profile['first_name'],
+							last_name=profile['last_name'],
+						)
+						r = dbapi.add_object(new_user)
+					except Exception as ex:
+						print(ex)
+					else:
+						break
+
 				if isinstance(r,str):
 					print("\t\t"+r)
 					ful_name = "db error"
