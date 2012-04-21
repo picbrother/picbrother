@@ -24,7 +24,7 @@ GEPHI_HOST	= "localhost"
 GEPHI_PORT	= 8080
 
 # instanciation des apis
-fbapi = FacebookAPI(FB_ACCESS_TOKEN)
+fbapi = FacebookAPI()
 fcapi = FacecomAPI(FC_API_KEY, FC_APP_SECRET)
 dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
 graphapi = GephiAPI(GEPHI_HOST, GEPHI_PORT)

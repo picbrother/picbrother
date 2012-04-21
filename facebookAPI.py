@@ -3,7 +3,53 @@
 from urllib import request, parse
 import json
 
+import sys
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from PyQt4.QtWebKit import *
+import sched, time
+s = sched.scheduler(time.time, time.sleep)
 
+from threading import Thread
+
+class myWebClient(Thread):
+	def __init__(self, fbapi):
+		super(myWebClient, self).__init__()
+		self.fbapi = fbapi
+		self.url = QUrl("https://www.facebook.com/dialog/oauth?client_id=309558635776311&redirect_uri=http://89.88.36.152/test.html?p=1&scope=offline_access,user_birthday,friends_birthday,user_photos,friends_photos,user_relationships,friends_relationships,user_relationship_details,friends_relationship_details,read_friendlists&response_type=token")
+		self.timer = ""
+
+	def run(self):
+		app = QApplication(sys.argv)
+		web = QWebView()
+		web.resize(1100, 700)
+		self.timer = QTimer()
+		QObject.connect(self.timer, SIGNAL("timeout()"), self.reload_token)
+		QObject.connect(web,SIGNAL("urlChanged (const QUrl&)"), self.link_clicked)
+		web.load(self.url)
+		web.show()
+		app.exec_()
+
+	def link_clicked(self, url):
+		"""
+		url of the page had changed
+		"""
+		if url.host() == "89.88.36.152":
+			fragment=url.fragment().split("&")
+			token=fragment[0].split("=")
+			expire=fragment[1].split("=")
+			self.fbapi.access_token=token[1]
+			if self.fbapi.verbose:
+				print(token[1])
+				print(expire[1])
+			self.timer.start(int(expire[1])*1000/2)
+
+
+	def reload_token(self):
+		"""
+		reload the token
+		"""
+		self.web.load(url)
 
 	
 class ResponsePages:
@@ -63,9 +109,14 @@ class DataResponse(ResponsePages):
 		
 	
 class FacebookAPI:
-	def __init__(self, access_token, *, verbose=False):
+	def __init__(self, *, access_token="", verbose=False):
 		self.access_token = access_token
 		self.verbose = verbose
+		if self.access_token == "":
+			w = myWebClient(self)
+			w.start()
+		while self.access_token == "":
+			time.sleep(1)
 
 	def get_albums(self, subject):
 		return DataResponse("https://graph.facebook.com/%s/albums?limit=100&access_token=%s" % (subject, self.access_token), self.verbose)
@@ -88,10 +139,11 @@ class FacebookAPI:
 				break
 		return json.loads(r)
 
-if __name__ == "__main__":
-	ACCESS_TOKEN = "AAAEZAiryFyTcBAPPdSJcEt68wob2k0sBqc9SqUAcnnWxT42D3M5pDPzORA9HlSh1ldA9fos9GYQ2HhUdFrbrngCWUF2WIvXhifd70wjwFsC86pCXl"
 
-	api = FacebookAPI(ACCESS_TOKEN, verbose=True)
+
+if __name__ == "__main__":
+
+	api = FacebookAPI(verbose=True)
 
 	nb_albums = 0
 	nb_photos = 0

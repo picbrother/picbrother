@@ -24,7 +24,7 @@ cursor = conn.cursor ()
 
 if __name__ == '__main__':
 	gexf = Gexf("PIC BROTHER","Le graph du pic !")
-	graph = gexf.addGraph("directed","static","Picbrother graph")
+	graph = gexf.addGraph("undirected","static","Picbrother graph")
 	cursor.execute ("SELECT id, fb_id, first_name, last_name FROM  `T_USER` ")
 	rows = cursor.fetchall ()
 	for row in rows:
