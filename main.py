@@ -126,7 +126,7 @@ for album in fbapi.get_albums("me"):
 					namespace="facebook.com",
 					detector="Aggressive",
 					#attributes="all",
-					user_auth="fb_user:%s,fb_oauth_token:%s" % (FB_USER_ID, FB_ACCESS_TOKEN)
+					user_auth="fb_user:%s,fb_oauth_token:%s" % (FB_USER_ID, fbapi.get_access_token())
 				)
 				if result and 'photos' in result:
 					for photo in result['photos']:

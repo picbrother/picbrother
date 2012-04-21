@@ -139,6 +139,9 @@ class FacebookAPI:
 				break
 		return json.loads(r)
 
+	def get_access_token(self):
+		return self.access_token
+
 
 
 if __name__ == "__main__":
