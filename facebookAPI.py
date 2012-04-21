@@ -58,7 +58,6 @@ class ResponsePages:
 		self.url = None
 		self.raw_page = None
 		self.page = {'paging': {'next': url}}
-		#self.opener = request.FancyURLopener(max_tries=10)
 
 	def init(self, url):
 		if self.verbose:
@@ -103,7 +102,7 @@ class DataResponse(ResponsePages):
 			return next(self.iobject)
 		except StopIteration:
 			ResponsePages.__next__(self)
-			self.iphotos = iter(self.page['data'])
+			self.iobject = iter(self.page['data'])
 			return next(self.iobject)
 
 		
