@@ -4,9 +4,13 @@ from urllib import request, parse
 import json
 
 import sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtWebKit import *
+try:
+	from PyQt4.QtCore import *
+	from PyQt4.QtGui import *
+	from PyQt4.QtWebKit import *
+except ImportError as ex:
+	print(ex)
+	print("But it is not necessary")
 import sched, time
 s = sched.scheduler(time.time, time.sleep)
 
@@ -144,15 +148,15 @@ class FacebookAPI:
 
 
 if __name__ == "__main__":
+	from config import *
 
-	api = FacebookAPI(verbose=True)
+	api = FacebookAPI(access_token=FB_ACCESS_TOKEN,verbose=True)
 
 	nb_albums = 0
 	nb_photos = 0
 
 	profile = api.get_profile("me")
 	print(profile)
-	exit()
 	for album in api.get_albums("me"):
 		print("ALBUM {name} (#{id})".format(**album))
 		nb_albums += 1
