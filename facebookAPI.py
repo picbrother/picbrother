@@ -121,11 +121,11 @@ class FacebookAPI:
 		while self.access_token == "":
 			time.sleep(1)
 
-	def get_albums(self, subject):
-		return DataResponse("https://graph.facebook.com/%s/albums?limit=100&access_token=%s" % (subject, self.access_token), self.verbose)
+	def get_albums(self, subject, limit=100):
+		return DataResponse("https://graph.facebook.com/%s/albums?limit=%s&access_token=%s" % (subject, limit, self.access_token), self.verbose)
 
-	def get_photos(self, subject):
-		return DataResponse("https://graph.facebook.com/%s/photos?limit=100&access_token=%s" % (subject, self.access_token), self.verbose)
+	def get_photos(self, subject, limit=100):
+		return DataResponse("https://graph.facebook.com/%s/photos?limit=%s&access_token=%s" % (subject, limit, self.access_token), self.verbose)
 
 	def get_profile(self, subject):
 		url = "https://graph.facebook.com/%s?&access_token=%s" % (subject, self.access_token)
@@ -157,10 +157,10 @@ if __name__ == "__main__":
 
 	profile = api.get_profile("me")
 	print(profile)
-	for album in api.get_albums("me"):
+	for album in api.get_albums("me",20):
 		print("ALBUM {name} (#{id})".format(**album))
 		nb_albums += 1
-		for photo in api.get_photos(album['id']):
+		for photo in api.get_photos(album['id'],20):
 			print("\tPHOTO #%s" % photo['id'])
 			print("\t\t* %s" % photo['source'])
 			nb_photos += 1

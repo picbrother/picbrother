@@ -65,12 +65,13 @@ class FacecomAPI:
 
 
 if __name__ == "__main__":
-	API_KEY		= "da444b9c09b0c03a7355a3b37a56c1e0"
-	APP_SECRET	= "8138a4afa7d5bb82fc167f0a594dfccf"
-	api = FacecomAPI(API_KEY, APP_SECRET, verbose=True)
-
+	import sys
+	from config import *
+	
+	api = FacecomAPI(FC_API_KEY, FC_APP_SECRET, verbose=True)
+	image_url = sys.argv[1] if len(sys.argv) > 1 else "https://fbcdn-sphotos-a.akamaihd.net/hphotos-ak-ash3/528598_226102264164638_100002945999274_426143_744451539_n.jpg"
 	result = api.recognize(
-		"https://fbcdn-sphotos-a.akamaihd.net/hphotos-ak-ash3/528598_226102264164638_100002945999274_426143_744451539_n.jpg",
+		image_url,
 		"friends@facebook.com",
 		namespace="facebook.com",
 		detector="Aggressive",

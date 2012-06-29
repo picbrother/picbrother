@@ -3,6 +3,8 @@
 
 import MySQLdb
 from gexf import Gexf
+from unac import unac
+
 
 # mysql
 DB_HOST		= "localhost"
@@ -30,15 +32,16 @@ if __name__ == '__main__':
 	for row in rows:
 		print "%s, %s, %s, %s" % (row[0], row[1], row[2], row[3])
 		#graph.addNode(row[0],u"#%s => %s %s" % (row[1],row[2],row[3])) #  ==>  Probléme d'accent... Comment faire ?
-		graph.addNode(row[0],u"#%s" % (row[1]))
+		graph.addNode(str(row[0]),unac.unac_string("%s %s" % (row[2],row[3]), "utf-8"))
 	print "Nombre de user ajoute : %d" % cursor.rowcount
 	cursor.execute ("SELECT U1.user_id, U2.user_id, COUNT( * ) weight FROM  `J_PHOTO_USER` U1,  `J_PHOTO_USER` U2 WHERE U1.photo_id = U2.photo_id AND U1.user_id != U2.user_id GROUP BY U1.user_id, U2.user_id")
 	rows = cursor.fetchall ()
 	edge_id = 0
 	for row in rows:
 		print "%s, %s, %s, %s" % (edge_id,row[0], row[1], row[2])
-		graph.addEdge(edge_id,row[0],row[1],row[2])
+		graph.addEdge(str(edge_id),str(row[0]),str(row[1]),str(row[2]))
 		edge_id+=1
 	print "Nombre de liens ajoute : %d" % cursor.rowcount  	
 	output_file=open("output.gexf","w")
+	print "coucou"
 	gexf.write(output_file)

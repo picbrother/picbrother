@@ -41,6 +41,8 @@ class GephiAPI:
 	def json_node(self, id_node, label=None, **params):
 		if not label:
 			params['label'] = id_node
+		else:
+			params['label'] = label
 		return {id_node: params}
 
 	def add_edge(self, source, target, *, workspace_id=0, **params):

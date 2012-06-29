@@ -4,27 +4,10 @@ from facebookAPI import *
 from facecomAPI import *
 from mysqlAPI import *
 from gephiAPI import *
-
-# facebook
-FB_ACCESS_TOKEN = "AAAEZAiryFyTcBAMjxztgJGaEAFpwXidNZAt03pfSS6cJUXFGrCgome0Bs41HDm5nvsVZCByxGsV6iLxv3l9ESayTZCp5kZBTRf2aehYsuhgY6L0s1y9ZBo"
-FB_USER_ID		= "100002945999274"
-
-# facecom
-FC_API_KEY		= "da444b9c09b0c03a7355a3b37a56c1e0"
-FC_APP_SECRET	= "8138a4afa7d5bb82fc167f0a594dfccf"
-
-# mysql
-DB_HOST		= "localhost"
-DB_USER		= "root"
-DB_PSWD		= "root"
-DB_NAME		= "picbrother"
-
-#GEPHI
-GEPHI_HOST	= "localhost"
-GEPHI_PORT	= 8080
+from config import *
 
 # instanciation des apis
-fbapi = FacebookAPI()
+fbapi = FacebookAPI(access_token=FB_ACCESS_TOKEN)
 fcapi = FacecomAPI(FC_API_KEY, FC_APP_SECRET)
 dbapi = MysqlAPI(DB_HOST, DB_USER, DB_PSWD, DB_NAME, verbose=False)
 graphapi = GephiAPI(GEPHI_HOST, GEPHI_PORT)
@@ -62,7 +45,7 @@ def add_users(tags):
 					db_user = r
 			if db_user:
 				results.append(db_user)
-				graphapi.add_node(db_user.fb_id)
+				graphapi.add_node(db_user.fb_id, label=(db_user.first_name+" "+db_user.last_name), first_name=db_user.first_name, last_name=db_user.last_name)
 				ful_name = db_user.first_name+" "+db_user.last_name
 			print("\t\t* %s #%s (%s percents)" % (ful_name, fb_id, confidence))
 		else:
@@ -119,6 +102,8 @@ for album in fbapi.get_albums("me"):
 			photo_exists = dbapi.get_fb_photo(photo_fb_id)
 			if photo_exists:
 				print("\tphoto déjà visitée")
+				for user in photo_exists.users:
+					graphapi.add_node(user.fb_id, label=(user.first_name+" "+user.last_name), first_name=user.first_name, last_name=user.last_name)
 			else:
 				result = fcapi.recognize(
 					photo["source"],
